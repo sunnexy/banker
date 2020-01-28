@@ -7,6 +7,6 @@ const getUser = require('../middleware/getUser');
 const AccountController = require('../controllers/account');
 /* GET users listing. */
 
-router.post('/', checkAuth, getUser, AccountController.account_create);
+router.post('/', getUser, AccountController.accountCreate);
 
 module.exports = router;

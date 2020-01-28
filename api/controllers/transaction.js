@@ -3,13 +3,13 @@ const User = require('../models/user');
 const Account = require('../models/account');
 const Transaction = require('../models/transaction');
 
-exports.account_credit = (req, res, next) =>{
+exports.accountCredit = (req, res, next) =>{
 	const numb = req.params.accountNumber;
 	Account.findOne({accountNumber: numb})
 	.exec()
 	.then(acct => {
 		if(!acct){
-			res.status(409).json({
+			res.status(404).json({
 				message: "Account doesnt exist"
 			});
 		}
@@ -53,12 +53,12 @@ exports.account_credit = (req, res, next) =>{
 	})
 }
 
-exports.account_debit = (req, res, next) =>{
+exports.accountDebit = (req, res, next) =>{
 	Account.findOne({accountNumber: req.params.accountNumber})
 	.exec()
 	.then(acct => {
 		if(!acct){
-			res.status(409).json({
+			res.status(404).json({
 				message: "Account doesnt exist"
 			});
 		}

@@ -5,8 +5,8 @@ const getUser = require('../middleware/getUser');
 
 const TransactionController = require('../controllers/transaction');
 
-router.post('/:accountNumber/credit', checkAuth, getUser, TransactionController.account_credit);
+router.post('/:accountNumber/credit', checkAuth, getUser, TransactionController.accountCredit);
 
-router.post('/:accountNumber/debit', checkAuth, getUser, TransactionController.account_debit);
+router.post('/:accountNumber/debit', checkAuth, getUser, TransactionController.accountDebit);
 
 module.exports = router;

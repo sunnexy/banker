@@ -1,26 +1,26 @@
 const express = require('express');
 const router = express.Router();
-const checkAuth = require('../middleware/check-auth');
+//const checkAuth = require('../middleware/check-auth');
 const getUser = require('../middleware/getUser');
 
 //const UsersController = require('../controllers/user');
 const AdminController = require('../controllers/admin');
 /* GET users listing. */
 
-router.post('/auth/signup', AdminController.admin_create);
+router.post('/auth/signup', AdminController.adminCreate);
 
-router.post('/auth/login', AdminController.admin_login);
+router.post('/auth/login', AdminController.adminLogin);
 
-router.patch('/account/:accountNumber/activate', checkAuth, getUser, AdminController.account_activate);
+router.patch('/account/:accountNumber/activate', getUser, AdminController.accountActivate);
 
-router.patch('/account/:accountNumber/deactivate', checkAuth, getUser, AdminController.account_deactivate);
+router.patch('/account/:accountNumber/deactivate', getUser, AdminController.accountDeactivate);
 
-router.get('/account', checkAuth, getUser, AdminController.get_all_accounts);
+router.get('/account', getUser, AdminController.getAllAccounts);
 
-router.get('/accounts?status=active', checkAuth, getUser, AdminController.get_active_accounts);
+router.get('/accounts/status=active', getUser, AdminController.getActiveAccounts);
 
-router.get('/accounts?status=dormant', checkAuth, getUser, AdminController.get_dormant_accounts);
+router.get('/accounts/status=dormant', getUser, AdminController.getDormantAccounts);
 
-router.delete('/account/:accountId', checkAuth, getUser, AdminController.account_delete);
+router.delete('/account/:accountId', getUser, AdminController.accountDelete);
 
 module.exports = router;

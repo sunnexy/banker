@@ -5,7 +5,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv').config();
 
-exports.admin_create = (req, res, next) => {
+exports.adminCreate = (req, res, next) => {
 	User.find({email: req.body.email})
 	.exec()
 	.then(user => {
@@ -41,7 +41,7 @@ exports.admin_create = (req, res, next) => {
 						{
 							expiresIn: "1hr"
 						});
-						console.log(result);
+						//console.log(result);
 						res.status(201).json({
 							message: 'Admin created',
 							token: token,
@@ -66,17 +66,17 @@ exports.admin_create = (req, res, next) => {
 	})	
 }
 
-exports.admin_login = (req, res, next) => {
+exports.adminLogin = (req, res, next) => {
 	User.find({ email: req.body.email})
 	.exec()
 	.then(user => {
 		if(user.length < 1) {
-			return res.status(404).json({
+			return res.status(401).json({
 				message: "Login failed"
 			});
 		}
 		if(user[0].isAdmin === false){
-			res.status(404).json({
+			res.status(401).json({
 				message: "Login failed"
 			});
 		}
@@ -91,7 +91,8 @@ exports.admin_login = (req, res, next) => {
 					email: user[0].email,
 					userId: user[0]._id,
 					firstname: user[0].firstname,
-					lastname: user[0].lastname
+					lastname: user[0].lastname,
+					isAdmin: user[0].isAdmin
 				},
 				process.env.JWT_KEY, 
 				{
@@ -123,128 +124,175 @@ exports.admin_login = (req, res, next) => {
 	});
 }
 
-exports.account_activate = (req, res, next) => {
-	const number = req.params.accountNumber;
-	Account.updateOne({ accountNumber: number}, { $set: { status: "active"} })
+exports.accountActivate = (req, res, next) => {
+	User.find({email: req.userData.email})
 	.exec()
-	.then(acct => {
-		console.log(acct);
-		res.status(200).json({
-			message: "Account activated successfully"
+	.then(user => {
+		console.log(user[0].isAdmin);
+		if(user[0].isAdmin === false){
+			res.status(409).json({
+				message: "For admin only"
+			});
+		}
+		const number = req.params.accountNumber;
+		Account.updateOne({ accountNumber: number}, { $set: { status: "active"} })
+		.exec()
+		.then(acct => {
+			console.log(acct);
+			res.status(200).json({
+				message: "Account activated successfully"
+			});
+		})
+		.catch(err => {
+			console.log(err);
+			res.status(500).json({
+				error: err
+			});
 		});
 	})
-	.catch(err => {
-		console.log(err);
-		res.status(500).json({
-			error: err
-		});
-	});
 }
-exports.account_deactivate = (req, res, next) => {
-	const number = req.params.accountNumber;
-	Account.updateOne({ accountNumber: number}, { $set: { status: "dormant"} })
+exports.accountDeactivate = (req, res, next) => {
+	User.find({email: req.userData.email})
 	.exec()
-	.then(acct => {
-		console.log(acct);
-		res.status(200).json({
-			message: "Account deactivated successfully"
+	.then(user => {
+		console.log(user[0].isAdmin);
+		if(user[0].isAdmin === false){
+			res.status(409).json({
+				message: "For admin only"
+			});
+		}
+		const number = req.params.accountNumber;
+		Account.updateOne({ accountNumber: number}, { $set: { status: "dormant"} })
+		.exec()
+		.then(acct => {
+			console.log(acct);
+			res.status(200).json({
+				message: "Account deactivated successfully"
+			});
+		})
+		.catch(err => {
+			console.log(err);
+			res.status(500).json({
+				error: err
+			});
 		});
 	})
-	.catch(err => {
-		console.log(err);
-		res.status(500).json({
-			error: err
-		});
-	});
 }
 
-exports.get_all_accounts = (req, res, next) => {
-	Account.find()
-	.populate('owner', '-_id email')
+exports.getAllAccounts = (req, res, next) => {
+	User.find({email: req.userData.email})
 	.exec()
-	.then(accounts => {
-		res.status(201).json({
-			status: accounts.length,
-			Accounts: accounts.map(account => {
-				return {
-					createdOn: account.createdOn.toDateString(),
-					accountNumber: account.accountNumber,
-					ownerEmail: account.owner,
-					type: account.type,
-					status: account.status,
-					balance: account.Openingbalance
-				}
+	.then(user => {
+		console.log(user[0].isAdmin);
+		if(user[0].isAdmin === false){
+			res.status(409).json({
+				message: "For admin only"
+			});
+		}
+		Account.find()
+		.populate('owner', '-_id email')
+		.exec()
+		.then(accounts => {
+			res.status(200).json({
+				status: accounts.length,
+				Accounts: accounts.map(account => {
+					return {
+						createdOn: account.createdOn.toDateString(),
+						accountNumber: account.accountNumber,
+						ownerEmail: account.owner,
+						type: account.type,
+						status: account.status,
+						balance: account.Openingbalance
+					}
+				})
 			})
 		})
-	})
-	.catch(err => {
-		console.log(err);
-		res.status(500).json({
-			error: err
+		.catch(err => {
+			console.log(err);
+			res.status(500).json({
+				error: err
+			});
 		});
-	});
+	})
 }
 
-exports.get_active_accounts = (req, res, next) => {
-	// res.status(201).json({
-	// 	message: "its on"
-	// });
-	console.log(req.query.status);
-	Account.find({status: 'active'})
-	.populate('owner', '-_id email')
+exports.getActiveAccounts = (req, res, next) => {
+	User.find({email: req.userData.email})
 	.exec()
-	.then(accounts => {
-		res.status(201).json({
-			status: accounts.length,
-			Accounts: accounts.map(account => {
-				return {
-					createdOn: account.createdOn,
-					accountNumber: account.accountNumber,
-					ownerEmail: account.owner,
-					type: account.type,
-					status: account.status,
-					balance: account.Openingbalance
-				}
+	.then(user => {
+		console.log(user[0].isAdmin);
+		if(user[0].isAdmin === false){
+			res.status(409).json({
+				message: "For admin only"
+			});
+		}
+		console.log(req.query.status);
+		Account.find({status: 'active'})
+		.populate('owner', '-_id email')
+		.exec()
+		.then(accounts => {
+			res.status(200).json({
+				status: accounts.length,
+				Accounts: accounts.map(account => {
+					return {
+						createdOn: account.createdOn,
+						accountNumber: account.accountNumber,
+						ownerEmail: account.owner,
+						type: account.type,
+						status: account.status,
+						balance: account.Openingbalance
+					}
+				})
 			})
 		})
-	})
-	.catch(err => {
-		console.log(err);
-		res.status(500).json({
-			error: err
+		.catch(err => {
+			console.log(err);
+			res.status(500).json({
+				error: err
+			});
 		});
-	});
+	})
 }
 
-exports.get_dormant_accounts = (req, res, next) => {
-	console.log(req.query.status);
-	Account.find({status: req.query.status})
-	.populate('owner', '-_id email')
+exports.getDormantAccounts = (req, res, next) => {
+	User.find({email: req.userData.email})
 	.exec()
-	.then(accounts => {
-		res.status(201).json({
-			status: accounts.length,
-			Accounts: accounts.map(account => {
-				return {
-					createdOn: account.createdOn,
-					accountNumber: account.accountNumber,
-					ownerEmail: account.owner,
-					type: account.type,
-					status: account.status,
-					balance: account.Openingbalance
-				}
+	.then(user => {
+		console.log(user[0].isAdmin);
+		if(user[0].isAdmin === false){
+			res.status(409).json({
+				message: "For admin only"
+			});
+		}
+		console.log(req.query.status);
+		Account.find({status: 'dormant'})
+		.populate('owner', '-_id email')
+		.exec()
+		.then(accounts => {
+			res.status(200).json({
+				status: accounts.length,
+				Accounts: accounts.map(account => {
+					return {
+						createdOn: account.createdOn,
+						accountNumber: account.accountNumber,
+						ownerEmail: account.owner,
+						type: account.type,
+						status: account.status,
+						balance: account.Openingbalance
+					}
+				})
 			})
 		})
-	})
-	.catch(err => {
-		console.log(err);
-		res.status(500).json({
-			error: err
+		.catch(err => {
+			console.log(err);
+			res.status(500).json({
+				error: err
+			});
 		});
-	});
+	})
 }
 
-exports.account_delete = (req, res, next) => {
+exports.accountDelete = (req, res, next) => {
 	const number = req.params.accountId;
 	Account.remove({accountNumber: number})
 	.exec()

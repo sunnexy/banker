@@ -7,12 +7,12 @@ const Transaction = require('../models/transaction');
 const Account = require('../models/account');
 
 
-exports.user_create = (req, res, next) => {
+exports.userCreate = (req, res, next) => {
 	User.find({email: req.body.email})
 	.exec()
 	.then(user => {
 		if(user.length >=1){
-			return res.status(409).json({
+			return res.status(422).json({
 				message: "Email exists already"
 			});
 		}else{
@@ -43,7 +43,7 @@ exports.user_create = (req, res, next) => {
 						{
 							expiresIn: "1hr"
 						});
-						console.log(result);
+						//console.log(result);
 						res.status(201).json({
 							message: 'User created',
 							token: token,
@@ -68,12 +68,12 @@ exports.user_create = (req, res, next) => {
 	})	
 }
 
-exports.user_login = (req, res, next) => {
+exports.userLogin = (req, res, next) => {
 	User.find({ email: req.body.email})
 	.exec()
 	.then(user => {
 		if(user.length < 1) {
-			return res.status(404).json({
+			return res.status(401).json({
 				message: "Login failed"
 			});
 		}
@@ -88,7 +88,8 @@ exports.user_login = (req, res, next) => {
 					email: user[0].email,
 					userId: user[0]._id,
 					firstname: user[0].firstname,
-					lastname: user[0].lastname
+					lastname: user[0].lastname,
+					isAdmin: user[0].isAdmin
 				},
 				process.env.JWT_KEY, 
 				{
@@ -102,7 +103,8 @@ exports.user_login = (req, res, next) => {
 						id: user[0]._id,
 						firstname: user[0].firstname,
 						lastname: user[0].lastname,
-						email: user[0].email
+						email: user[0].email,
+						isAdmin: user[0].isAdmin
 					}
 				});
 			}
@@ -119,12 +121,11 @@ exports.user_login = (req, res, next) => {
 	});
 }
 
-exports.get_all_transactions = (req, res, next) => {
+exports.getAllTransactions = (req, res, next) => {
 	Transaction.find({accountNumber: req.params.accountNumber})
 	//.select("_id createdOn type accountNumber amount oldBalance newBalance")
 	.exec()
 	.then(docs => {
-		//console.log(docs);
 		res.status(200).json({
 			status: docs.length,
 			data: docs.map(doc => {
@@ -148,7 +149,7 @@ exports.get_all_transactions = (req, res, next) => {
 	});
 }
 
-exports.get_a_transaction = (req, res, next) => {
+exports.getATransaction = (req, res, next) => {
 	Transaction.findOne({_id: req.params.transactionId})
 	.exec()
 	.then(trans => {
@@ -172,7 +173,7 @@ exports.get_a_transaction = (req, res, next) => {
 	});
 }
 
-exports.get_account_details = (req, res, next) => {
+exports.getAccountDetails = (req, res, next) => {
 	Account.findOne({accountNumber: req.params.accountNumber})
 	.exec()
 	.then(account => {
@@ -194,4 +195,40 @@ exports.get_account_details = (req, res, next) => {
 			error: err
 		});
 	})
+}
+
+exports.getAllAccounts = (req, res, next) => {
+	User.find({email: req.params.email})
+	.exec()
+	.then(user => {
+		console.log(user[0].email)
+		if(user[0].email !== req.userData.email){
+			res.status(422).json({
+				message: "details does not match"
+			});
+		}
+		Account.find({owner: user[0]._id})
+		.exec()
+		.then(accounts => {
+			res.status(200).json({
+				Number_of_accounts: accounts.length,
+				data: accounts.map(account => {
+					return{
+						createdOn: account.createdOn.toDateString(),
+						accountNumber: account.accountNumber,
+						type: account.type,
+						status: account.status,
+						balance: account.Openingbalance
+					}
+				})	
+			});
+		})
+		.catch(err => {
+			console.log(err);
+			res.status(500).json({
+				error: err
+			});
+		})
+	})
+	
 }
