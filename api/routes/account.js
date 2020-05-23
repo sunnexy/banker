@@ -10,3 +10,4 @@ const AccountController = require('../controllers/account');
 router.post('/', getUser, AccountController.accountCreate);
 
 module.exports = router;
+
