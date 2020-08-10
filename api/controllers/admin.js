@@ -72,12 +72,12 @@ exports.adminLogin = (req, res, next) => {
 	.then(user => {
 		if(user.length < 1) {
 			return res.status(401).json({
-				message: "Login failed"
+				message: "Login failed! Wrong Email"
 			});
 		}
 		if(user[0].isAdmin === false){
-			res.status(401).json({
-				message: "Login failed"
+			return res.status(401).json({
+				message: "Login failed! Not an admin"
 			});
 		}
 		bcrypt.compare(req.body.password, user[0].password, (err, result) => {
@@ -294,7 +294,7 @@ exports.getDormantAccounts = (req, res, next) => {
 
 exports.accountDelete = (req, res, next) => {
 	const number = req.params.accountId;
-	Account.remove({accountNumber: number})
+	Account.deleteOne({accountNumber: number})
 	.exec()
 	.then(acct => {
 		res.status(200).json({

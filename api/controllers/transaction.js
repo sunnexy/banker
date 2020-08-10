@@ -33,6 +33,7 @@ exports.accountCredit = (req, res, next) =>{
 					amount: doc.amount,
 					cashier: doc.cashier,
 					transactionType: doc.type,
+					oldBalance: doc.oldBalance,
 					Balance: doc.newBalance
 				}
 			});
@@ -83,6 +84,7 @@ exports.accountDebit = (req, res, next) =>{
 					amount: doc.amount,
 					cashier: doc.cashier,
 					transactionType: doc.type,
+					oldBalance: doc.oldBalance,
 					Balance: doc.newBalance
 				}
 			});

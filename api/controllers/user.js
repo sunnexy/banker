@@ -74,13 +74,13 @@ exports.userLogin = (req, res, next) => {
 	.then(user => {
 		if(user.length < 1) {
 			return res.status(401).json({
-				message: "Login failed"
+				message: "Email Incorrect. Login failed"
 			});
 		}
 		bcrypt.compare(req.body.password, user[0].password, (err, result) => {
 			if(err){
 				return res.status(401).json({
-					message: "Login failed"
+					message: "Password Incorrect. Login failed"
 				});
 			}
 			if(result){
@@ -201,9 +201,8 @@ exports.getAllAccounts = (req, res, next) => {
 	User.find({email: req.params.email})
 	.exec()
 	.then(user => {
-		console.log(user[0].email)
-		if(user[0].email !== req.userData.email){
-			res.status(422).json({
+		if(!user){
+			return res.status(401).json({
 				message: "details does not match"
 			});
 		}

@@ -19,6 +19,22 @@
 // });
 
 // before(function(done) {
+// 	request(app).post('/admin/auth/signup')
+// 	.send({
+// 		email: 'admin@yahoo.com',
+// 		password: '1234',
+// 		firstname: 'mike',
+// 		lastname: 'Nice',
+// 		type: 'admin',
+// 		isAdmin: 1
+// 	})
+// 	.then((res) => {
+// 		expect(200)
+// 		done();
+// 	});
+// });
+
+// before(function(done) {
 // 	request(app).post('/user/auth/signup')
 // 	.send({
 // 		email: 'Brycen_Cruickshank@yahoo.com',
@@ -30,64 +46,61 @@
 // 	})
 // 	.then((res) => {
 // 		expect(200)
+// 		console.log(res.body);
 // 		done();
 // 	});
 // });
 
-// after((done) => {
-//     mongoose.connection.collections['users'].drop();
-//     done();
-// });
-
-
-// describe('POST /users', () => {
-// 	it('OK, login successful', function(done) {
-// 		request(app).post('/user/auth/login')
-// 		.send({ email: 'Brycen_Cruickshank@yahoo.com',
+// describe('POST /admin', () => {
+// 	it('checks admin can login', function(done){
+// 		request(app).post('/admin/auth/login')
+// 		.send({ email: 'admin@yahoo.com',
 // 				password: '1234',
 // 			})
 // 		.expect(200)
 // 		.then((res) => {
 // 			const body = res.body;
-// 			//console.log(body);
 // 			expect(body.message).to.equal("Login successful");
 // 			done();
 // 		});
 // 	});
 
-// 	it('Test if Email is correct', function(done) {
-// 		request(app).post('/user/auth/login')
-// 		.send({ email: 'Brycen_Cruickshan@yahoo.com',
+// 	it('checks login user is an admin', function(done){
+// 		request(app).post('/admin/auth/login')
+// 		.send({ email: 'Brycen_Cruickshank@yahoo.com',
 // 				password: '1234',
 // 			})
+// 		.expect(401)
 // 		.then((res) => {
-// 			expect(401)
-// 			expect(res.body.message).to.equal("Email Incorrect. Login failed");
-// 			done();
-// 		})
-// 	});
-
-// 	it('OK, login details incorrect', function(done) {
-// 		request(app).post('/user/auth/login')
-// 		.send({ email: 'Brycen_Cruickshank@yahoo.com',
-// 				password: '2233',
-// 			})
-// 		.then((res) => {
-// 			expect(401)
-// 			expect(res.body.message).to.equal("Login failed");
+// 			expect(res.body.message).to.equal("Login failed! Not an admin");
+// 			//expect(body.message.data.)
 // 			done();
 // 		});
 // 	});
 
-// 	it('Should login and return token', function(done) {
-// 		request(app).post('/user/auth/login')
-// 		.send({ email: 'Brycen_Cruickshank@yahoo.com',
+// 	it('checks admin email is correct', function(done){
+// 		request(app).post('/admin/auth/login')
+// 		.send({ email: 'admi@yahoo.com',
 // 				password: '1234',
 // 			})
-// 		.expect(200)
+// 		.expect(401)
 // 		.then((res) => {
-// 			expect(res.body.token).to.not.be.null;;
+// 			const body = res.body;
+// 			expect(body.message).to.equal("Login failed! Wrong Email");
 // 			done();
+// 		});
+// 	});
+
+
+// 	it('checks for wrong password', function(done){
+// 		request(app).post('/admin/auth/login')
+// 		.send({ email: 'admin@yahoo.com',
+// 				password: '2345'
 // 		})
+// 		.expect(401)
+// 		.then((res) => {
+// 			expect(res.body.message).to.equal("Login failed");
+// 			done();
+// 		});
 // 	});
 // });

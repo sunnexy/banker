@@ -7,6 +7,6 @@ const TransactionController = require('../controllers/transaction');
 
 router.post('/:accountNumber/credit', TransactionController.accountCredit);
 
-router.post('/:accountNumber/debit', checkAuth, getUser, TransactionController.accountDebit);
+router.post('/:accountNumber/debit', TransactionController.accountDebit);
 
 module.exports = router;

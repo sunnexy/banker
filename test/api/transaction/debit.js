@@ -4,14 +4,12 @@
 // const Mockgoose = require('mockgoose').Mockgoose;
 // const mockgoose = new Mockgoose(mongoose);
 // const faker = require('faker');
-// const sum = require('../../../calc');
-// //const chai = require('chai');
+// const {sub, sum} = require('../../../calc');
 
 // const Account = require('../../../api/models/account');
 // const app = require('../../../app');
 // const users = require('../../../api/routes/transaction.js');
 // const conn = require('../../../server.js');
-// const Transaction = require('../../../api/models/transaction');
 
 // const accountDetails= {
 // 	accountNumber:  9131548783,
@@ -73,34 +71,34 @@
 //     done();
 // });
 
+
 // describe('POST /transaction', () => {
-// 	it('account has been credited', function(done){
-// 		request(app).post('/transaction/'+acctNo+'/credit')
-// 		.send({ type: 'credit',
+// 	it('account has been debited', function(done){
+// 		request(app).post('/transaction/'+acctNo+'/debit')
+// 		.send({ type: 'debit',
 // 				accountNumber:  acctNo,
 // 				cashier: faker.name.findName(),
-// 				amount: 12000,
+// 				amount: 2000,
 // 		})
 // 		//.expect(201)
 // 		.then((res) => {
-// 			const body = res.body;
-// 			//console.log(body)
-// 			expect(body.data.amount + body.data.oldBalance).to.equal(body.data.Balance);
-// 			expect(body.message).to.equal("Credited account successfully");
+// 			//console.log(res.body);
+// 			expect(res.body.data.oldBalance - res.body.data.amount).to.equal(res.body.data.Balance);
+// 			expect(res.body.message).to.equal("Account debited successfully");
 // 			done();
 // 		});
 // 	});
 
 // 	it('account number is wrong', function(done) {
-// 		request(app).post('/transaction/1020304050/credit')
+// 		request(app).post('/transaction/1020304050/debit')
 // 		.send({
-// 			type: 'credit',
+// 			type: 'debit',
 // 			accountNumber:  acctNo,
 // 			cashier: faker.name.findName(),
-// 			amount: 2500
+// 			amount: 3000
 // 		})
 // 		.then((res) => {
-// 			//expect(404)
+// 			expect(404)
 // 			expect(res.body.message).to.equal("Account doesnt exist");
 // 			done();
 // 		});
